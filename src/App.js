@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import ImageGrid from './component/ImageGrid';
 import SearchBar from './component/SearchBar';
@@ -13,7 +13,8 @@ const App = () => {
     fetchImages();
   }, [page, query]);
 
-  const fetchImages = async () => {
+
+  const fetchImages = useCallback(async () => {
     const response = await axios.get('https://api.unsplash.com/photos', {
       params: {
         client_id: 'YHCC6MFRiyGIu2paUb7Z5hBspC7fWdHwrmEF7bG4ltA',
@@ -22,9 +23,14 @@ const App = () => {
         query,
       },
     });
-
+  
     setImages((prevImages) => [...prevImages, ...response.data]);
-  };
+  }, [page, query]);
+  
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
+  
 
   const handleSearch = (searchQuery) => {
     setQuery(searchQuery);
@@ -34,18 +40,20 @@ const App = () => {
 
   const handleScroll = () => {
     if (
-      window.innerHeight + document.documentElement.scrollTop !==
+      window.innerHeight + document.documentElement.scrollTop ===
       document.documentElement.offsetHeight
-    )
-      return;
-    setPage((prevPage) => prevPage + 1);
+    ) {
+      setPage((prevPage) => prevPage + 1);
+    }
   };
+  
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
+  
+  
   return (
     <div className="app">
       <h1>Infinite Image Scrolling App</h1>
